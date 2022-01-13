@@ -1,0 +1,40 @@
+﻿@implements IAsyncDisposable
+@inject IJSRuntime JsRuntime
+
+<div @ref="popoverElement">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Target { get; set; }
+
+    [Parameter]
+    public string ShowEvent { get; set; } = "dxclick";
+
+    [Parameter]
+    public PopoverPosition Position { get; set; } = PopoverPosition.Bottom;
+
+    private ElementReference popoverElement;
+    private IJSObjectReference jsModule;
+    private IJSObjectReference jsPopover;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./popover.js");
+            jsPopover = await jsModule.InvokeAsync<IJSObjectReference>("create", popoverElement, Target, ShowEvent, Position.ToString().ToLower());
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await jsModule.InvokeVoidAsync("dispose", jsPopover);
+        await jsPopover.DisposeAsync();
+        await jsModule.DisposeAsync();
+    }
+}

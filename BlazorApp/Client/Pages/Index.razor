@@ -1,7 +1,61 @@
 ﻿@page "/"
+@page "/{year:int}/{month:int}/{day:int}"
 
-<h1>Hello, world!</h1>
+@inject NavigationManager _navigationManager
 
-Welcome to your new app.
+<h3>@_selectedDate.ToLongDateString()</h3>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="row">
+    <div class="col-6">
+        <DxButton id="calendarButton"
+                  IconCssClass="oi oi-calendar"
+                  RenderStyle="@ButtonRenderStyle.Light" />
+        <Popover Target="#calendarButton">
+            <DxCalendar T="@DateTime"
+                        VisibleDate="@_selectedDate"
+                        SelectedDate="@_selectedDate"
+                        SelectedDateChanged="@SelectedDateChanged"
+                        ShowClearButton="@false" />
+        </Popover>
+    </div>
+    <div class="col-6">
+        <DxCalendar T="@DateTime"
+                    VisibleDate="@_selectedDate"
+                    SelectedDate="@_selectedDate"
+                    SelectedDateChanged="@SelectedDateChanged"
+                    ShowClearButton="@false" />
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int? Year { get; set; }
+
+    [Parameter]
+    public int? Month { get; set; }
+
+    [Parameter]
+    public int? Day { get; set; }
+
+    private DateTime _selectedDate;
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        var year = parameters.GetValueOrDefault<int?>("year");
+        var month = parameters.GetValueOrDefault<int?>("month");
+        var day = parameters.GetValueOrDefault<int?>("day");
+
+        if (year == null || month == null || day == null)
+            _selectedDate = DateTime.Now;
+        else
+            _selectedDate = new DateTime(year.Value, month.Value, day.Value);
+
+        await base.SetParametersAsync(parameters);
+    }
+
+    private void SelectedDateChanged(DateTime date)
+    {
+        _navigationManager.NavigateTo($"/{date.Year}/{date.Month}/{date.Day}");
+    }
+}
