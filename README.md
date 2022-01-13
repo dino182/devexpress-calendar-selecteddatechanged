@@ -1,0 +1,1 @@
+This sample application demonstrates a bug when attempting to use the [SelectedDateChanged](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxCalendar-1.SelectedDateChanged) event on a Blazor Calendar inside a DevExtreme Popover control.
